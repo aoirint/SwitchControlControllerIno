@@ -64,6 +64,8 @@ const uint8_t HAT_CENTER = 0x08;
 SoftwareSerial serialToProxy(8, 9); // RX, TX
 USB_JoystickReport_Input_t joystickData;
 
+String serialBuffer = "";
+
 void setup() {
   static HIDSubDescriptor node(_hidReportDescriptor, sizeof(_hidReportDescriptor));
   NoReportIDHID.AppendDescriptor(&node);
@@ -75,31 +77,39 @@ void setup() {
   joystickData.rightX = STICK_CENTER;
   joystickData.rightY = STICK_CENTER;
 
-  serialToProxy.begin(115200);
+  serialToProxy.begin(1200);
 }
 
 void loop() {
-  if (serialToProxy.available()) {
-    serialToProxyEvent();
+  while (! serialToProxy.available()) {
+    delay(50);
   }
-}
 
-void serialToProxyEvent() {
-  StaticJsonDocument<255> msg;
-  bool jsonError = false;
+  StaticJsonDocument<200> msg;
+  deserializeJson(msg, serialToProxy);
 
-  if (nextSerialJson(serialToProxy, &msg, &jsonError)) {
-    joystickData.button = msg["button"];
-    joystickData.hat = msg["hat"];
-    joystickData.leftX = msg["leftX"];
-    joystickData.leftY = msg["leftY"];
-    joystickData.rightX = msg["rightX"];
-    joystickData.rightY = msg["rightY"];
+  joystickData.button = msg["button"];
+  joystickData.hat = msg["hat"];
+  joystickData.leftX = msg["leftX"];
+  joystickData.leftY = msg["leftY"];
+  joystickData.rightX = msg["rightX"];
+  joystickData.rightY = msg["rightY"];
 
-    NoReportIDHID.SendReport(&joystickData, sizeof(USB_JoystickReport_Input_t));
-  }
-  else if (jsonError) {
-    // StaticJsonDocument<255> response;
-    // serializeJson(response, Serial); Serial.println();
-  }
+  NoReportIDHID.SendReport(&joystickData, sizeof(USB_JoystickReport_Input_t));
+
+  // serializeJson(msg, serialToProxy);
+
+  serialToProxy.print(", B: ");
+  serialToProxy.print(joystickData.button, HEX);
+  serialToProxy.print(", H: ");
+  serialToProxy.print(joystickData.hat, HEX);
+  serialToProxy.print(", LX: ");
+  serialToProxy.print(joystickData.leftX, HEX);
+  serialToProxy.print(", LY: ");
+  serialToProxy.print(joystickData.leftY, HEX);
+  serialToProxy.print(", RX: ");
+  serialToProxy.print(joystickData.rightX, HEX);
+  serialToProxy.print(", RY: ");
+  serialToProxy.print(joystickData.rightY, HEX);
+  serialToProxy.println();
 }
