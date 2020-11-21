@@ -1,4 +1,6 @@
 # SwitchControlControllerIno
+Leonardoに書き込み、SwitchのUSBポートに接続すると、USBコントローラとして動く。
+ソフトウェアシリアル（RX：8ピン、TX：9番ピン）を通じて操作を受け付ける。
 
 
 ## Requirements
