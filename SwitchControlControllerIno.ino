@@ -61,7 +61,7 @@ const uint8_t STICK_CENTER = 0x7F;
 const uint8_t HAT_CENTER = 0x08;
 
 
-SoftwareSerial serialToProxy(2, 3);
+SoftwareSerial serialToProxy(2, 3); // RX, TX
 USB_JoystickReport_Input_t joystickData;
 
 void setup() {
